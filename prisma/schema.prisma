@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id               String   @id @default(uuid())
+  username         String   @unique @db.VarChar
+  email            String   @unique @db.VarChar
+  password         String   @db.VarChar
+  profile_pic      String?  @db.VarChar
+  bio              String?  @db.VarChar
+  cooking_skill_level String? @db.VarChar
+  created_at       DateTime @default(now()) @db.Timestamp
+  updated_at       DateTime @updatedAt @db.Timestamp
+
+  recipes          Recipe[]
+  favouriteRecipes FavouriteRecipe[]
+  reviews          RecipeReview[]
+}
+
+model Recipe {
+  id               String   @id @default(uuid())
+  userId           String
+  title            String   @db.VarChar
+  description      String?  @db.VarChar
+  ingredients      String[]
+  instructions     String[]
+  cuisine_type     String[]
+  final_img        String?  @db.VarChar
+  difficulty_level String?  @db.VarChar
+  prep_time        Int?
+  cook_time        Int?
+  tags             String[]
+  is_deleted       Boolean  @default(false)
+  created_at       DateTime @default(now()) @db.Timestamp
+  updated_at       DateTime @updatedAt @db.Timestamp
+
+  user             User     @relation(fields: [userId], references: [id],onDelete: Cascade)
+  reviews          RecipeReview[]
+  favouriteRecipes FavouriteRecipe[]
+
+  @@index([userId])
+  @@index([is_deleted])
+}
+
+model FavouriteRecipe {
+  id        String   @id @default(uuid())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @updatedAt @db.Timestamp
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+}
+
+model RecipeReview {
+  id         String   @id @default(uuid())
+  userId     String
+  recipeId   String
+  rating     Int      @db.SmallInt
+  comment    String?  @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamp
+  updated_at DateTime @updatedAt @db.Timestamp
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([recipeId])
+}

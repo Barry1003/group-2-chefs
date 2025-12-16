@@ -1,0 +1,18 @@
+[31m[1m2025-12-16 17:59:30 ERROR:    [POST /api/v1/auth/signup] [22m[39m
+[31m[1mInvalid `prisma.user.findUnique()` invocation in[22m[39m
+[31m[1mC:\Users\semil\Documents\swdev\group-2-chefs\src\services\classes\user.service.ts:10:23[22m[39m
+
+[31m[1m   7 private readonly logger = new Logger().logger;[22m[39m
+[31m[1m   8 public async findExistingUser(username: string) {[22m[39m
+[31m[1m   9 	try {[22m[39m
+[31m[1m→ 10 		return prisma.user.findUnique([22m[39m
+[31m[1mCan't reach database server at db.prisma.io[22m[39m
+[31m[1m2025-12-16 18:03:01 ERROR:    [POST /api/v1/auth/signup] [22m[39m
+[31m[1mInvalid `prisma.user.findUnique()` invocation in[22m[39m
+[31m[1mC:\Users\semil\Documents\swdev\group-2-chefs\src\services\classes\user.service.ts:10:23[22m[39m
+
+[31m[1m   7 private readonly logger = new Logger().logger;[22m[39m
+[31m[1m   8 public async findExistingUser(username: string) {[22m[39m
+[31m[1m   9 	try {[22m[39m
+[31m[1m→ 10 		return prisma.user.findUnique([22m[39m
+[31m[1mThe table `public.User` does not exist in the current database.[22m[39m

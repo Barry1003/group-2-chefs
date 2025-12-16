@@ -1,0 +1,54 @@
+{
+  "name": "group-2-chefs",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "NODE_ENV=production tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "migrate": "prisma migrate dev",
+    "setup": "npm install && npx prisma generate && npx prisma migrate dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shemigam1/group-2-chefs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shemigam1/group-2-chefs/issues"
+  },
+  "homepage": "https://github.com/shemigam1/group-2-chefs#readme",
+  "devDependencies": {
+    "@types/node": "^25.0.2",
+    "@types/pg": "^8.16.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^7.1.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.16.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.21.0",
+    "winston": "^3.19.0"
+  }
+}
