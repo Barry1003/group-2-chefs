@@ -1,41 +1,60 @@
-import {prisma} from "../../database/conn";
-import { RecipeInput, RecipeUpdate, RecipeResponse } from "../../types/recipe.type";
+import { prisma } from "../../database/conn";
+import {
+  RecipeInput,
+  RecipeUpdate,
+  RecipeResponse,
+} from "../../types/recipe.type";
+
+class AppError extends Error {
+  statusCode: number;
+  constructor(message: string, statusCode = 500) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 export default class RecipeService {
+  // Map input to Prisma-compatible data
+  private static mapRecipeData(data: Partial<RecipeInput>) {
+    const mapped: any = {
+      title: data.title ?? "", // required
+      description: data.description ?? null,
+      ingredients: data.ingredients ?? [], // arrays cannot be null
+      instructions: data.instructions ?? [],
+      difficulty_level: data.difficulty_level ?? null,
+      final_img: data.final_img ?? null,
+      prep_time: data.prep_time ?? null,
+      cook_time: data.cook_time ?? null,
+    };
+
+    // Optional array fields: only include if defined
+    if (data.cuisine_type && data.cuisine_type.length > 0)
+      mapped.cuisine_type = data.cuisine_type;
+    if (data.tags && data.tags.length > 0) mapped.tags = data.tags;
+
+    return mapped;
+  }
+
   static async createRecipe(
     userId: string,
     data: RecipeInput
   ): Promise<RecipeResponse> {
-    const {
-      title,
-      description,
-      ingredients,
-      instructions,
-      cuisine_type,
-      difficulty_level,
-      tags,
-      final_img,
-      prep_time,
-      cook_time,
-    } = data;
+    if (!data.title) throw new AppError("Title is required", 400);
+
+    const recipeData = this.mapRecipeData(data);
 
     const recipe = await prisma.recipe.create({
       data: {
         userId,
-        title,
-        description,
-        ingredients,
-        instructions,
-        cuisine_type,
-        difficulty_level,
-        tags,
-        final_img,
-        prep_time,
-        cook_time,
+        ...recipeData,
       },
     });
 
-    return recipe; 
+    return {
+      ...recipe,
+      created_at: recipe.created_at.toISOString(),
+      updated_at: recipe.updated_at.toISOString(),
+    };
   }
 
   static async updateRecipe(
@@ -45,26 +64,30 @@ export default class RecipeService {
   ): Promise<RecipeResponse> {
     const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
 
-    if (!recipe || recipe.is_deleted) throw new Error("Not allowed");
-    if (recipe.userId !== userId) throw new Error("Not allowed");
+    if (!recipe || recipe.is_deleted)
+      throw new AppError("Recipe not found or already deleted", 404);
+    if (recipe.userId !== userId)
+      throw new AppError("You are not allowed to update this recipe", 403);
+
+    const updatedData = this.mapRecipeData(data);
+
+    // Remove undefined fields so Prisma update works
+    Object.keys(updatedData).forEach(
+      (key) =>
+        updatedData[key as keyof typeof updatedData] === undefined &&
+        delete updatedData[key as keyof typeof updatedData]
+    );
 
     const updatedRecipe = await prisma.recipe.update({
       where: { id: recipeId },
-      data: {
-        title: data.title,
-        description: data.description,
-        ingredients: data.ingredients,
-        instructions: data.instructions,
-        cuisine_type: data.cuisine_type,
-        difficulty_level: data.difficulty_level,
-        tags: data.tags,
-        final_img: data.final_img,
-        prep_time: data.prep_time,
-        cook_time: data.cook_time,
-      },
+      data: updatedData,
     });
 
-    return updatedRecipe;
+    return {
+      ...updatedRecipe,
+      created_at: updatedRecipe.created_at.toISOString(),
+      updated_at: updatedRecipe.updated_at.toISOString(),
+    };
   }
 
   static async deleteRecipe(
@@ -73,14 +96,20 @@ export default class RecipeService {
   ): Promise<RecipeResponse> {
     const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
 
-    if (!recipe) throw new Error("Not allowed");
-    if (recipe.userId !== userId) throw new Error("Not allowed");
+    if (!recipe || recipe.is_deleted)
+      throw new AppError("Recipe not found or already deleted", 404);
+    if (recipe.userId !== userId)
+      throw new AppError("You are not allowed to delete this recipe", 403);
 
     const deletedRecipe = await prisma.recipe.update({
       where: { id: recipeId },
       data: { is_deleted: true },
     });
 
-    return deletedRecipe;
+    return {
+      ...deletedRecipe,
+      created_at: deletedRecipe.created_at.toISOString(),
+      updated_at: deletedRecipe.updated_at.toISOString(),
+    };
   }
 }
