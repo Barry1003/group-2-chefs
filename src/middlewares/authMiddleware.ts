@@ -3,7 +3,7 @@ import { ResultFunction, verifyJwt } from "../helpers/utils";
 // import { ReturnStatus } from "../types/generic";
 // import User from "../models/user.model";
 import { prisma } from "../database/conn";
-import { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 
 const authMiddleWare = async (
   req: Request,
@@ -37,16 +37,21 @@ const authMiddleWare = async (
   }
 
   // verify jwt token
-  // const payload = verifyJwt(token);
-  // if (payload instanceof JsonWebTokenError) {
-  //   // if it's an instance of JsonWebTokenError then something was wrong with the token
-  //   // check how JsonWebTokenError is handled in error handler
-  //   return next(payload);
-  // }
+  const payload = verifyJwt(token);
+  if (payload instanceof Error) {
+    return res.status(response.code).json(response);
+  }
 
-  const id = req.body.id;
+  const payloadId = (payload as JwtPayload).id;
+  const id = payloadId || req.params.userId;
+  if (!id) {
+    return res.status(response.code).json(response);
+  }
   // // find user and add to res object
-  const data = await prisma.user.findUniqueOrThrow({ where: { id } });
+  const data = await prisma.user.findFirst({ where: { id, is_deleted: false } });
+  if (!data) {
+    return res.status(response.code).json(response);
+  }
   const user = {
     ...data,
     token,
