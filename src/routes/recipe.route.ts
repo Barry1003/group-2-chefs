@@ -5,6 +5,8 @@ import joiMiddleware from "../middlewares/joiMiddleware";
 import {
   createRecipeSchema,
   updateRecipeSchema,
+  listRecipesSchema,
+  recipeIdParamSchema,
 } from "../validators/recipevalidator";
 
 const router = Router();
@@ -160,5 +162,48 @@ router.put(
  *         description: Unauthorized
  */
 router.delete("/:recipeId", authMiddleware, RecipeController.deleteRecipe);
+
+/**
+ * @swagger
+ * /recipes:
+ *   get:
+ *     summary: List all recipes with pagination
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Paginated list of recipes
+ */
+router.get("/", authMiddleware, joiMiddleware(listRecipesSchema, "query"), RecipeController.listRecipes);
+
+/**
+ * @swagger
+ * /recipes/{recipeId}:
+ *   get:
+ *     summary: Get recipe details by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: recipeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Recipe details
+ *       404:
+ *         description: Recipe not found
+ */
+router.get("/:recipeId", authMiddleware, joiMiddleware(recipeIdParamSchema, "params"), RecipeController.getRecipeById);
 
 export default router;
