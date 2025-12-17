@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { ResultFunction, verifyJwt } from "../helpers/utils";
-// import { ReturnStatus } from "../types/generic";
-// import User from "../models/user.model";
 import { prisma } from "../database/conn";
 import { JwtPayload } from "jsonwebtoken";
 
@@ -16,7 +14,6 @@ const authMiddleWare = async (
     false,
     "invalid or missing token",
     401,
-    // ReturnStatus.INVALID_TOKEN,
     null
   );
 
